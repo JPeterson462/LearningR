@@ -1,0 +1,109 @@
+#
+# Practice
+#
+
+# Mean of 7 numbers
+t <- c(2.23, 3.45, 1.87, 2.11, 7.33, 18.34, 19.23)
+mean(t)
+
+# Sum of i^2 from i=1 to 25
+t = c()
+for (index in 1:25) { t <- c(t, index * index) }
+sum(t)
+
+# Average distance of cars dataset
+mean(cars[,2])
+
+# Which row index of cars has a dist of 85
+which(cars[,2] == 85, arr.ind=TRUE)
+
+#
+# Gettting Started
+#
+femaleMiceWeights <- read.csv(file="femaleMiceWeights.csv")
+femaleMiceWeights[12,2]
+femaleMiceWeights$Bodyweight[11]
+length(femaleMiceWeights$Bodyweight)
+hf <- femaleMiceWeights[femaleMiceWeights$Diet == 'hf',]
+mean(hf[,2])
+set.seed(1)
+sample(13:24, size = 1) # == 21
+femaleMiceWeights[21, 2]
+
+library(downloader)
+url="https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/msleep_ggplot2.csv"
+filename <- basename(url)
+download(url,filename)
+
+#
+# dplyr
+#
+msleep <- read.csv("msleep_ggplot2.csv")
+class(msleep)
+nrow(msleep %>% filter(order == "Primates"))
+msleep %>% filter(order == "Primates") %>% select(sleep_total)
+msleep %>% filter(order == "Primates") %>% select(sleep_total) %>% unlist(use.names = FALSE) %>% mean()
+msleep %>% filter(order == "Primates") %>% summarize(mean = mean(sleep_total))
+
+#
+# qqnorm
+#
+par(mfrow = c(3,3))
+for (i in 1:9) { qqnorm(dat[,i]); qqline(dat[,i]) }
+
+#
+# boxplot
+#
+median(split(InsectSprays, InsectSprays$spray)$A[,1])
+boxplot(split(InsectSprays, InsectSprays$spray)$C[,1])
+boxplot(nym.2002$time~nym.2002$gender)
+
+#
+# random variables
+#
+mean(x)
+set.seed(1)
+mean(sample(x, size = 5))
+abs(mean(x) - 23.564)
+set.seed(5)
+y <- sample(x, size = 5)
+abs(mean(y) - mean(x))
+
+#
+# Null distributions
+#
+set.seed(1)
+a <- mean(x)
+res <- c()
+for (i in 1:1000) { res <- c(res, mean(sample(x, size = 5))) }
+count <- 0
+for (avg in res) { if (abs(avg - a) > 1) { count = count + 1 } }
+
+#
+# Probability distributions
+#
+x <- gapminder %>% filter(year == 1952) %>% .$lifeExp
+mean(x <= 40)
+mean(x > 40 & x <= 60)
+
+#
+# Normal distributions
+#
+pnorm(25, mean = 23.9, sd = 0.43) - pnorm(23, mean = 23.9, sd = 0.43)
+
+#
+# Population, samples, and estimates
+#
+males <- split(dat, dat$Sex)$M
+controlled <- split(males, males$Diet)$chow
+mean(controlled[,3])
+popsd(controlled[,3])
+
+#
+# Central limit theorem
+#
+stdev = popsd(males_control[,3])
+avg = mean(males_control[,3])
+weights = males_control[,3]
+mean(weights >= avg - stdev & weights <= avg + stdev)
+y <- filter(dat, Sex=="F" & Diet=="hf") %>% select(Bodyweight) %>% unlist
