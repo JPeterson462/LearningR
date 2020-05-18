@@ -107,3 +107,105 @@ avg = mean(males_control[,3])
 weights = males_control[,3]
 mean(weights >= avg - stdev & weights <= avg + stdev)
 y <- filter(dat, Sex=="F" & Diet=="hf") %>% select(Bodyweight) %>% unlist
+
+#
+# T distribution
+#
+simulate_runs = function(n) {
+x = sample(1:6, n, replace=TRUE)
+p = 1 / 6
+z = (mean(x == 6) - p) / sqrt(p * (1 - p) / n)
+z
+}
+X <- filter(dat, Diet=="chow") %>% select(Bodyweight) %>% unlist
+stderror = sqrt((sd(Y) * sd(Y))/12 + (sd(X) * sd(X))/12)
+t = (mean(Y) - mean(X)) / stderror
+# p(observing value as large as t-value)
+2 * (1 - pnorm(t))
+t.test(X, Y)
+
+#
+# Power calculations
+#
+set.seed(1)
+X = sample(bwt.nonsmoke, 5)
+Y = sample(bwt.smoke, 5)
+t.test(X, Y)
+
+N=90
+set.seed(1)
+rejects <- replicate(10000,{
+  dat.ns <- sample(bwt.nonsmoke , N)
+  dat.s <- sample(bwt.smoke , N)
+  t.test(dat.s, dat.ns)$p.value < 0.01
+})
+mean(rejects)
+
+#
+# Monte carlo simulations
+#
+set.seed(1)
+X = rnorm(5)
+t = sqrt(5) * mean(X) / sd(X)
+
+set.seed(1)
+par(mfrow = c(3,2))
+for (n in seq(5,30,5)) {
+	ts = replicate(1000,{
+		X = rnorm(n)
+		sqrt(n) * mean(X) / sd(X)
+	})
+	qqplot(qs, ts)
+}
+
+set.seed(1)
+N <- 1000
+B <- 10000
+tstats <- replicate(B,{
+  X <-  sample(c(-1,1), N, replace=TRUE)
+  sqrt(N)*median(X)/sd(X)
+})
+qqnorm(tstats)
+abline(0,1)
+
+#
+# Permuations exercise
+#
+
+# code from course
+obs = median(smokers) - median(nonsmokers)
+set.seed(1)
+null <- replicate(1000, {
+  shuffle <- sample( dat )
+  smokersstar <- shuffle[1:N]
+  nonsmokersstar <- shuffle[(N+1):(2*N)]
+  median(smokersstar)-median(nonsmokersstar)
+})
+( sum( abs(null) >= abs(obs)) +1 ) / ( length(null)+1 ) 
+##we add the 1s to avoid p-values=0 but we also accept:
+( sum( abs(null) >= abs(obs)) ) / ( length(null) )
+
+#
+# Association tests
+#
+chisq.test(table(d))
+fisher.test(table(d))
+
+men = filter(nym.2002, gender == "Male") %>% select(age, time)
+men_p = cor.test(men$age, men$time, method="pearson")
+
+#
+# Median MAD and Spearman Correlation
+#
+(dim(chick)[1] * mean(chick$weight.4) + 3000) / (dim(chick)[1] + 1) / mean(chick$weight.4)
+chick_plus_day4 = c(3000, chick$weight.4)
+chick_plus_day21 = c(3000, chick$weight.21)
+cor_plus = cor(chick_plus_day4, chick_plus_day21)
+cor_plus / cor(chick$weight.4, chick$weight.21)
+
+#
+# Wilcox test
+#
+x_xtra = c(x, 200)
+wilcox.test(x_xtra, y)$p.value
+t.test(x, y+10)$p.value - t.test(x, y + 100)$p.value
